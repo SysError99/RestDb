@@ -1,8 +1,0 @@
-{
-    "password": "password",
-    "tlsOptions":  {
-        "enabled": false,
-        "certFilePath": "",
-        "keyFilePath": ""
-    }
-}

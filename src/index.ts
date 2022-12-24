@@ -5,6 +5,16 @@ import { log } from "./func/log.ts";
 import { graphQlQueryToJson } from "https://esm.sh/graphql-query-to-json@2.0.1";
 
 
+const defaultConfig = {
+    password: "password",
+    tlsOptions: {
+        enabled: false,
+        certFilePath: "",
+        keyFilePath: "",      
+    },
+};
+
+
 class NotAllowedError extends Error {
 }
 
@@ -18,14 +28,7 @@ class NotFoundError extends Error {
 }
 
 
-type ConfigOptions = {
-    password: string,
-    tlsOptions: {
-        enabled: boolean,
-        certFilePath: string,
-        keyFilePath: string,
-    },
-};
+type ConfigOptions = typeof defaultConfig;
 
 
 type IoOptions = {
@@ -34,7 +37,18 @@ type IoOptions = {
 };
 
 
-const config = JSON.parse(Deno.readTextFileSync("./conf/conf.json")) as ConfigOptions;
+let config: ConfigOptions;
+
+try {
+    config = JSON.parse(Deno.readTextFileSync("./conf/conf.json")) as ConfigOptions;
+} catch (e) {
+    if (e.name === "NotFound") {
+        Deno.writeTextFileSync('./config.json', JSON.stringify(defaultConfig, null, "\t"));
+        log("Generated new config file, please shut down a server and reconfig.");
+        throw 0;
+    }
+    throw e;
+}
 
 
 async function translateArrayIndex(urlPathname: string): Promise<string> {
