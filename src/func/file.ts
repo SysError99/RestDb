@@ -3,13 +3,21 @@ import { encode as base64urlEncode } from "https://deno.land/std@0.170.0/encodin
 import { decode as msgpackDecode, encode as msgpackEncode } from "https://esm.sh/@msgpack/msgpack@2.8.0";
 
 
+const pathMap = new Map();
+
+
 async function convertToFilePath(urlPathname: string): Promise<string> {
-    return "./data/" + base64urlEncode(
+    if (pathMap.has(urlPathname)) {
+        return pathMap.get(urlPathname);
+    }
+    const p = "./data/" + base64urlEncode(
         await crypto.subtle.digest(
             'SHA-256',
             new TextEncoder().encode(urlPathname),
         )
     ) + ".bin";
+    pathMap.set(urlPathname, p);
+    return p;
 }
 
 
