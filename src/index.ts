@@ -41,7 +41,7 @@ let config: ConfigOptions;
 
 
 try {
-    config = JSON.parse(Deno.readTextFileSync("./conf/conf.json")) as ConfigOptions;
+    config = JSON.parse(Deno.readTextFileSync("./conf.json")) as ConfigOptions;
 } catch (e) {
     if (e.name === "NotFound") {
         Deno.writeTextFileSync('./config.json', JSON.stringify(defaultConfig, null, "\t"));
