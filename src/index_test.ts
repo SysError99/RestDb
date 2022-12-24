@@ -2,12 +2,14 @@
 import { parse } from "https://deno.land/std@0.170.0/flags/mod.ts";
 
 
+let postRequestCount = 0;
+let patchRequestCount = 0;
 let getRequestCount = 0;
-let postPatchRequestCount = 0;
+
 const array: string[] = [];
-let testStep = 0;
-array[1000000] = "";
 let arrayIndex = 0;
+array[1000000] = "";
+let testStep = 0;
 
 
 const flags = parse(Deno.args, {
@@ -94,20 +96,35 @@ headers.set("Content-Type", "application/json; charset=utf-8");
 headers.set("key", flags.key ? flags.key : "");
 
 
-async function postPatchRequest() {
+async function postRequest() {
     while (testStep === 0) {
         const uuid = crypto.randomUUID();
         await fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'POST', body: body });
-        fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'PATCH', body: patchBody });
-        array[postPatchRequestCount] = uuid;
-        postPatchRequestCount++;
+        array[postRequestCount] = uuid;
+        postRequestCount++;
+    }
+}
+
+
+async function patchRequest() {
+    while (testStep === 1) {
+        let uuid = array[arrayIndex];
+        if (typeof uuid === "undefined") {
+            console.log('Exceede all POST requests, relooping PATCH.');
+            uuid = array[0];
+            arrayIndex = 0;
+        }
+        await fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'PATCH', body: patchBody });
+        patchRequestCount++;
+        arrayIndex++;
     }
 }
 
 
 async function getRequest() {
-    while (testStep === 1) {
+    while (testStep === 2) {
         let uuid = array[arrayIndex];
+        console.log('Exceede all POST requests, relooping GET.');
         if (typeof uuid === "undefined") {
             uuid = array[0];
             arrayIndex = 0;
@@ -123,14 +140,18 @@ function runTest() {
     let func: Function;
     switch (testStep) {
         case 0:
-            func = postPatchRequest;
+            func = postRequest;
             break;
         case 1:
+            func = patchRequest;
+            break;
+        case 2:
             headers.set('ql', ql);
             func = getRequest;
             break;
         default:
-            console.log(`POST+PATCH average: ${postPatchRequestCount * 1000 / time} req/s`);
+            console.log(`POST average: ${postRequestCount * 1000 / time} req/s`);
+            console.log(`PATCH avereage: ${patchRequestCount * 1000 / time} req/s`);
             console.log(`GET average ${getRequestCount * 1000 / time} req/s`);
             Deno.exit(0);
     }
