@@ -3,27 +3,27 @@ import { encode as base64urlEncode } from "https://deno.land/std@0.170.0/encodin
 import { decode as msgpackDecode, encode as msgpackEncode } from "https://esm.sh/@msgpack/msgpack@2.8.0";
 
 
-const pathMap1 = new Map();
-const pathMap2 = new Map();
-const pathMap3 = new Map();
-const pathMap4 = new Map();
-const pathMap5 = new Map();
-const pathMap6 = new Map();
-const pathMap7 = new Map();
-const pathMap8 = new Map();
+const cachedPath1 = new Map();
+const cachedPath2 = new Map();
+const cachedPath3 = new Map();
+const cachedPath4 = new Map();
+const cachedPath5 = new Map();
+const cachedPath6 = new Map();
+const cachedPath7 = new Map();
+const cachedPath8 = new Map();
 const maxPathMap = 1000000;
 const maxPathMapPart = Math.floor(maxPathMap / 8);
-const pathMaps = [
-    pathMap1,
-    pathMap2,
-    pathMap3,
-    pathMap4,
-    pathMap5,
-    pathMap6,
-    pathMap7,
-    pathMap8,
+const cachedPaths = [
+    cachedPath1,
+    cachedPath2,
+    cachedPath3,
+    cachedPath4,
+    cachedPath5,
+    cachedPath6,
+    cachedPath7,
+    cachedPath8,
 ];
-const pathMapCounts = [
+const cachedPathCounts = [
     0,
     0,
     0,
@@ -36,29 +36,29 @@ const pathMapCounts = [
 
 
 async function convertToFilePath(urlPathname: string): Promise<string> {
-    if (pathMap1.has(urlPathname)) {
-        return pathMap1.get(urlPathname);
+    if (cachedPath1.has(urlPathname)) {
+        return cachedPath1.get(urlPathname);
     }
-    if (pathMap2.has(urlPathname)) {
-        return pathMap2.get(urlPathname);
+    if (cachedPath2.has(urlPathname)) {
+        return cachedPath2.get(urlPathname);
     }
-    if (pathMap3.has(urlPathname)) {
-        return pathMap3.get(urlPathname);
+    if (cachedPath3.has(urlPathname)) {
+        return cachedPath3.get(urlPathname);
     }
-    if (pathMap4.has(urlPathname)) {
-        return pathMap4.get(urlPathname);
+    if (cachedPath4.has(urlPathname)) {
+        return cachedPath4.get(urlPathname);
     }
-    if (pathMap5.has(urlPathname)) {
-        return pathMap5.get(urlPathname);
+    if (cachedPath5.has(urlPathname)) {
+        return cachedPath5.get(urlPathname);
     }
-    if (pathMap6.has(urlPathname)) {
-        return pathMap6.get(urlPathname);
+    if (cachedPath6.has(urlPathname)) {
+        return cachedPath6.get(urlPathname);
     }
-    if (pathMap7.has(urlPathname)) {
-        return pathMap7.get(urlPathname);
+    if (cachedPath7.has(urlPathname)) {
+        return cachedPath7.get(urlPathname);
     }
-    if (pathMap8.has(urlPathname)) {
-        return pathMap8.get(urlPathname);
+    if (cachedPath8.has(urlPathname)) {
+        return cachedPath8.get(urlPathname);
     }
     const p = "./data/" + base64urlEncode(
         await crypto.subtle.digest(
@@ -67,14 +67,14 @@ async function convertToFilePath(urlPathname: string): Promise<string> {
         )
     ) + ".bin";
     while (true) {
-        const rand = Math.floor(Math.random() * pathMaps.length);
-        const pathMap = pathMaps[rand]
-        if (pathMapCounts[rand] > maxPathMapPart ) {
-            pathMapCounts[rand] = 0;
-            pathMap.clear();
+        const rand = Math.floor(Math.random() * cachedPaths.length);
+        const cachedPath = cachedPaths[rand]
+        if (cachedPathCounts[rand] > maxPathMapPart ) {
+            cachedPathCounts[rand] = 0;
+            cachedPath.clear();
         }
-        pathMap.set(urlPathname, p);
-        pathMapCounts[rand]++;
+        cachedPath.set(urlPathname, p);
+        cachedPathCounts[rand]++;
         break;
     }
     return p;
