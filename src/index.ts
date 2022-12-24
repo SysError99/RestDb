@@ -44,7 +44,7 @@ try {
     config = JSON.parse(Deno.readTextFileSync("./conf.json")) as ConfigOptions;
 } catch (e) {
     if (e.name === "NotFound") {
-        Deno.writeTextFileSync('./config.json', JSON.stringify(defaultConfig, null, "\t"));
+        Deno.writeTextFileSync('./conf.json', JSON.stringify(defaultConfig, null, "\t"));
         log("Generated new config file, please shut down a server and reconfig.");
         throw 0;
     }
