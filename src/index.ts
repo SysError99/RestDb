@@ -39,6 +39,7 @@ type IoOptions = {
 
 let config: ConfigOptions;
 
+
 try {
     config = JSON.parse(Deno.readTextFileSync("./conf/conf.json")) as ConfigOptions;
 } catch (e) {
