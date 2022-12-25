@@ -1,5 +1,3 @@
-import { crypto } from "https://deno.land/std@0.170.0/crypto/mod.ts";
-import { encode as base64urlEncode } from "https://deno.land/std@0.170.0/encoding/base64url.ts";
 import { decode as msgpackDecode, encode as msgpackEncode } from "https://esm.sh/@msgpack/msgpack@2.8.0";
 import xxhash from "https://esm.sh/xxhash-wasm@1.0.2/esm/xxhash-wasm.js";
 
@@ -12,16 +10,6 @@ function later(delay: number): Promise<void> {
         setTimeout(resolve, delay);
     });
 }
-
-
-// async function convertToFilePath(urlPathname: string): Promise<string> {
-//     return "./data/" + base64urlEncode(
-//         await crypto.subtle.digest(
-//             'SHA-1',
-//             new TextEncoder().encode(urlPathname),
-//         )
-//     );
-// }
 
 
 function convertToFilePath(urlPathname: string) {
