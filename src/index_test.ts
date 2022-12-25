@@ -114,7 +114,10 @@ async function patchRequest() {
             uuid = array[0];
             arrayIndex = 0;
         }
-        await fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'PATCH', body: patchBody });
+        const res = await fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'PATCH', body: patchBody });
+        if (res.status != 200) {
+            console.error(`${uuid} returns ${res.status}`);
+        }
         patchRequestCount++;
         arrayIndex++;
     }
@@ -124,12 +127,15 @@ async function patchRequest() {
 async function getRequest() {
     while (testStep === 2) {
         let uuid = array[arrayIndex];
-        console.log('Exceede all POST requests, relooping GET.');
         if (typeof uuid === "undefined") {
+            console.log('Exceede all POST requests, relooping GET.');
             uuid = array[0];
             arrayIndex = 0;
         }
-        await fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'GET', });
+        const res = await fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'GET', });
+        if (res.status != 200) {
+          console.error(`${uuid} returns ${res.status}`);
+        }
         getRequestCount++;
         arrayIndex++;
     }
