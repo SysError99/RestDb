@@ -41,14 +41,15 @@ try {
 
 
 function hashToNumber (str: string): number {
-    let hash = 0, i, chr;
-    if (str.length === 0) return hash;
-    for (i = 0; i < str.length; i++) {
-        chr = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + chr;
-        hash |= 0; // Convert to 32bit integer
+    let val = 0;
+    const strlen = str.length;
+    if (strlen === 0) { return val; }
+    for (let i = 0; i < strlen; ++i) {
+      const code = str.charCodeAt(i);
+      val = ((val << 5) - val) + code;
+      val &= val; // Int32
     }
-    return hash;
+    return (val >>> 0); // uInt32
 }
 
 
@@ -128,12 +129,7 @@ async function handler(req: Request): Promise<Response> {
             body: body,
         };
         messagePromises.set(uid, resolve);
-        const index = hashToNumber(pathname.split('/')[1]) % workersLength;
-        try {
-        workers[index].postMessage(message);
-        } catch (e) {
-            console.error(`${e.name} from worker ${index}`);
-        }
+        workers[hashToNumber(pathname.split('/')[1]) % workersLength].postMessage(message);
         // workers[workerIndex].postMessage(message);
         // workerIndex++;
         // if (workerIndex == workersLength) {
@@ -147,6 +143,9 @@ async function handler(req: Request): Promise<Response> {
     }
     return new Response(wRes.text, { status: wRes.status });
 }
+
+
+
 
 
 if (config.tlsOptions.enabled) {
