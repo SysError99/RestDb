@@ -96,6 +96,7 @@ for (let i = 0; i < config.workers; i++) {
         if (messagePromises.has(uid)) {
             // deno-lint-ignore ban-types
             const resolve = messagePromises.get(uid) as Function;
+            messagePromises.delete(uid);
             resolve(wRes);
         }
     };
