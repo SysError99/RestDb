@@ -1,9 +1,6 @@
+import { crypto } from "https://deno.land/std@0.170.0/crypto/mod.ts";
 import { encode as base64urlEncode } from "https://deno.land/std@0.170.0/encoding/base64url.ts";
 import { decode as msgpackDecode, encode as msgpackEncode } from "https://esm.sh/@msgpack/msgpack@2.8.0";
-import { create as XXH64Create } from "https://deno.land/x/xxhash64@1.0.0/mod.ts";
-
-
-const h = await XXH64Create();
 
 
 function later(delay: number): Promise<void> {
@@ -13,19 +10,24 @@ function later(delay: number): Promise<void> {
 }
 
 
-function convertToFilePath(urlPathname: string): string {
-    return "./data/" + base64urlEncode(h.update(urlPathname).digest() as Uint8Array) + ".bin";
+async function convertToFilePath(urlPathname: string): Promise<string> {
+    return "./data/" + base64urlEncode(
+        await crypto.subtle.digest(
+            'SHA-1',
+            new TextEncoder().encode(urlPathname),
+        )
+    ) + ".bin";
 }
 
 
 export async function deleteFile(urlPathname: string): Promise<void> {
-    await Deno.remove(convertToFilePath(urlPathname));
+    await Deno.remove(await convertToFilePath(urlPathname));
 }
 
 
 export async function fileExists(urlPathname: string): Promise<boolean> {
     try {
-        await Deno.stat(convertToFilePath(urlPathname));
+        await Deno.stat(await convertToFilePath(urlPathname));
         return true;
     } catch (e) {
         if (e instanceof Deno.errors.NotFound) {
@@ -40,7 +42,7 @@ export async function readFile(urlPathname: string): Promise<unknown> {
     try {
         return msgpackDecode(
             await Deno.readFile(
-                convertToFilePath(urlPathname),
+                await convertToFilePath(urlPathname),
             ),
         );
     } catch (e) {
@@ -55,7 +57,7 @@ export async function readFile(urlPathname: string): Promise<unknown> {
 
 export async function writeFile(urlPathname: string, object: unknown, createIfNotExist = true, preventOverwrite = false): Promise<void> {
     await Deno.writeFile(
-        convertToFilePath(urlPathname),
+        await convertToFilePath(urlPathname),
         msgpackEncode(object),
         {
             create: createIfNotExist,
