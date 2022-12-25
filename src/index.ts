@@ -7,6 +7,7 @@ import { WorkerMessage, WorkerResponse } from "./index.types.ts";
 
 const defaultConfig = {
     password: "password",
+    workers: 2,
     tlsOptions: {
         enabled: false,
         certFilePath: "",
@@ -68,12 +69,12 @@ function getWorker() {
 
 
 const messagePromises = new Map();
-const workers = [getWorker(), getWorker()];
+const workers: Worker[] = [];
 let workerIndex = 0;
 
 
-for (const i in workers) {
-    const worker = workers[i];
+for (let i = 0; i < config.workers; i++) {
+    const worker = getWorker();
     worker.onmessage = (e) => {
         const res = e.data as WorkerResponse;
         const uid = res.uid ? res.uid : "";
@@ -84,6 +85,7 @@ for (const i in workers) {
             resolve(res);
         }
     };
+    workers.push(worker);
 }
 
 
