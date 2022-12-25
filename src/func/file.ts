@@ -20,12 +20,12 @@ function later(delay: number): Promise<void> {
 //             'SHA-1',
 //             new TextEncoder().encode(urlPathname),
 //         )
-//     ) + ".bin";
+//     );
 // }
 
 
 function convertToFilePath(urlPathname: string) {
-    return hasher.h64ToString(urlPathname);
+    return "./data/" + hasher.h64ToString(urlPathname);
 }
 
 
