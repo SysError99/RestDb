@@ -83,16 +83,18 @@ export async function fileExists(urlPathname: string): Promise<boolean> {
 
 
 export async function readFile(urlPathname: string): Promise<unknown> {
-    let blob = new Uint8Array([]);
-    while (true) {
-        blob = await Deno.readFile(await convertToFilePath(urlPathname));
-        if (blob.length < 1) {
+    try {
+        return msgpackDecode(
+            await Deno.readFile(
+                await convertToFilePath(urlPathname),
+            ),
+        );
+    } catch (e) {
+        if (e.name == "RangeError") {
             await later(Math.random());
-            continue;
+            return await readFile(urlPathname);
         }
-        break;
     }
-    return msgpackDecode(blob);
 }
 
 
