@@ -40,17 +40,17 @@ try {
 }
 
 
-function hashToNumber (str: string): number {
-    let val = 0;
-    const strlen = str.length;
-    if (strlen === 0) { return val; }
-    for (let i = 0; i < strlen; ++i) {
-      const code = str.charCodeAt(i);
-      val = ((val << 5) - val) + code;
-      val &= val; // Int32
-    }
-    return (val >>> 0); // uInt32
-}
+// function hashToNumber (str: string): number {
+//     let val = 0;
+//     const strlen = str.length;
+//     if (strlen === 0) { return val; }
+//     for (let i = 0; i < strlen; ++i) {
+//       const code = str.charCodeAt(i);
+//       val = ((val << 5) - val) + code;
+//       val &= val; // Int32
+//     }
+//     return (val >>> 0); // uInt32
+// }
 
 
 async function translateArrayIndex(urlPathname: string): Promise<string> {
@@ -82,7 +82,7 @@ function getWorker() {
 
 
 const messagePromises = new Map();
-const workerhashMap = new Map();
+// const workerhashMap = new Map();
 const workers: Worker[] = [];
 let workerIndex = 0;
 
@@ -130,18 +130,18 @@ async function handler(req: Request): Promise<Response> {
             body: body,
         };
         messagePromises.set(uid, resolve);
-        if (workerhashMap.has(pathname)) {
-            workers[workerhashMap.get(pathname)].postMessage(message);
-        } else {
-            const i = hashToNumber(pathname.split('/')[1]) % workersLength;
-            workerhashMap.set(pathname, i);
-            workers[i].postMessage(message);
-        }
-        // workers[workerIndex].postMessage(message);
-        // workerIndex++;
-        // if (workerIndex == workersLength) {
-        //     workerIndex = 0;
+        // if (workerhashMap.has(pathname)) {
+        //     workers[workerhashMap.get(pathname)].postMessage(message);
+        // } else {
+        //     const i = hashToNumber(pathname.split('/')[1]) % workersLength;
+        //     workerhashMap.set(pathname, i);
+        //     workers[i].postMessage(message);
         // }
+        workers[workerIndex].postMessage(message);
+        workerIndex++;
+        if (workerIndex == workersLength) {
+            workerIndex = 0;
+        }
     });
     if (wRes.json) {
         const response = new Response(JSON.stringify(wRes.json), { status: wRes.status });
