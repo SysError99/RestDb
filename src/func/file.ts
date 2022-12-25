@@ -3,6 +3,13 @@ import { encode as base64urlEncode } from "https://deno.land/std@0.170.0/encodin
 import { decode as msgpackDecode, encode as msgpackEncode } from "https://esm.sh/@msgpack/msgpack@2.8.0";
 
 
+function later(delay: number): Promise<void> {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, delay);
+    });
+}
+
+
 const cachedPath1 = new Map();
 const cachedPath2 = new Map();
 const cachedPath3 = new Map();
@@ -45,7 +52,7 @@ async function convertToFilePath(urlPathname: string): Promise<string> {
     while (true) {
         const rand = Math.floor(Math.random() * cachedPaths.length);
         const cachedPath = cachedPaths[rand]
-        if (cachedPathCounts[rand] > maxCacheMapPart ) {
+        if (cachedPathCounts[rand] > maxCacheMapPart) {
             cachedPathCounts[rand] = 0;
             cachedPath.clear();
         }
@@ -76,11 +83,16 @@ export async function fileExists(urlPathname: string): Promise<boolean> {
 
 
 export async function readFile(urlPathname: string): Promise<unknown> {
-    return msgpackDecode(
-        await Deno.readFile(
-            await convertToFilePath(urlPathname)
-        )
-    );
+    let blob = new Uint8Array([]);
+    while (true) {
+        blob = await Deno.readFile(await convertToFilePath(urlPathname));
+        if (blob.length < 1) {
+            await later(Math.random());
+            continue;
+        }
+        break;
+    }
+    return msgpackDecode(blob);
 }
 
 
