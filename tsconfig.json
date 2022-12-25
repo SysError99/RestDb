@@ -1,3 +1,9 @@
 {
-    "compilerOptions": {}
+    "compilerOptions": {
+        "lib": [
+            "dom",
+            "ES2017",
+            "WebWorker"
+        ]
+    }
 }
