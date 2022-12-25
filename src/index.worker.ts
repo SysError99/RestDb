@@ -238,6 +238,12 @@ async function handler(req: WorkerMessage): Promise<WorkerResponse> {
             }
             break;
         case "POST":
+            if (pathname.split('/').length > 2) {
+                return {
+                    status: 405,
+                    text: "POST only supports multiple depth path, consider using PATCH from first depth of path instead.",
+                };
+            }
             try {
                 await writeObject(pathname, req.body, { createIfNotExist: true, preventOverwrite: true, });
                 return {
