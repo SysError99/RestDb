@@ -11,7 +11,7 @@ const defaultConfig = {
     tlsOptions: {
         enabled: false,
         certFilePath: "",
-        keyFilePath: "",      
+        keyFilePath: "",
     },
 };
 
@@ -37,6 +37,18 @@ try {
         throw 0;
     }
     throw e;
+}
+
+
+function hashToNumber (str: string): number {
+    let hash = 0, i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+        chr = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
 }
 
 
@@ -116,11 +128,12 @@ async function handler(req: Request): Promise<Response> {
             body: body,
         };
         messagePromises.set(uid, resolve);
-        workers[workerIndex].postMessage(message);
-        workerIndex++;
-        if (workerIndex == workersLength) {
-            workerIndex = 0;
-        }
+        workers[hashToNumber(workersLength)].postMessage(message);
+        // workers[workerIndex].postMessage(message);
+        // workerIndex++;
+        // if (workerIndex == workersLength) {
+        //     workerIndex = 0;
+        // }
     });
     if (wRes.json) {
         const response = new Response(JSON.stringify(wRes.json), { status: wRes.status });
