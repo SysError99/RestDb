@@ -14,43 +14,11 @@ const defaultConfig = {
         keyFilePath: "",
     },
 };
-
-
 type ConfigOptions = typeof defaultConfig;
-
-
-type IoOptions = {
-    createIfNotExist: boolean,
-    preventOverwrite: boolean,
-};
-
-
+const messagePromises = new Map();
+const workers: Worker[] = [];
 let config: ConfigOptions;
-
-
-try {
-    config = JSON.parse(Deno.readTextFileSync("./conf.json")) as ConfigOptions;
-} catch (e) {
-    if (e.name === "NotFound") {
-        Deno.writeTextFileSync('./conf.json', JSON.stringify(defaultConfig, null, "\t"));
-        log("Generated new config file, please shut down a server and reconfig.");
-        throw 0;
-    }
-    throw e;
-}
-
-
-// function hashToNumber (str: string): number {
-//     let val = 0;
-//     const strlen = str.length;
-//     if (strlen === 0) { return val; }
-//     for (let i = 0; i < strlen; ++i) {
-//       const code = str.charCodeAt(i);
-//       val = ((val << 5) - val) + code;
-//       val &= val; // Int32
-//     }
-//     return (val >>> 0); // uInt32
-// }
+let workerIndex = 0;
 
 
 async function translateArrayIndex(urlPathname: string): Promise<string> {
@@ -81,10 +49,16 @@ function getWorker() {
 }
 
 
-const messagePromises = new Map();
-// const workerhashMap = new Map();
-const workers: Worker[] = [];
-let workerIndex = 0;
+try {
+    config = JSON.parse(Deno.readTextFileSync("./conf.json")) as ConfigOptions;
+} catch (e) {
+    if (e.name === "NotFound") {
+        Deno.writeTextFileSync('./conf.json', JSON.stringify(defaultConfig, null, "\t"));
+        log("Generated new config file, please shut down a server and reconfig.");
+        throw 0;
+    }
+    throw e;
+}
 
 
 for (let i = 0; i < config.workers; i++) {
@@ -131,13 +105,6 @@ async function handler(req: Request): Promise<Response> {
             body: body,
         };
         messagePromises.set(uid, resolve);
-        // if (workerhashMap.has(pathname)) {
-        //     workers[workerhashMap.get(pathname)].postMessage(message);
-        // } else {
-        //     const i = hashToNumber(pathname.split('/')[1]) % workersLength;
-        //     workerhashMap.set(pathname, i);
-        //     workers[i].postMessage(message);
-        // }
         workers[workerIndex].postMessage(message);
         workerIndex++;
         if (workerIndex == workersLength) {
@@ -151,9 +118,6 @@ async function handler(req: Request): Promise<Response> {
     }
     return new Response(wRes.text, { status: wRes.status });
 }
-
-
-
 
 
 if (config.tlsOptions.enabled) {
