@@ -94,6 +94,7 @@ export async function readFile(urlPathname: string): Promise<unknown> {
             await later(Math.random());
             return await readFile(urlPathname);
         }
+        throw e;
     }
 }
 
