@@ -128,8 +128,12 @@ async function handler(req: Request): Promise<Response> {
             body: body,
         };
         messagePromises.set(uid, resolve);
-        const firstDepth = pathname.split('/')[1];
-        workers[hashToNumber(firstDepth) % workersLength].postMessage(message);
+        const index = hashToNumber(pathname.split('/')[1]) % workersLength;
+        try {
+        workers[index].postMessage(message);
+        } catch (e) {
+            console.error(`${e.name} from worker ${index}`);
+        }
         // workers[workerIndex].postMessage(message);
         // workerIndex++;
         // if (workerIndex == workersLength) {
