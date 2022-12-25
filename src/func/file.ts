@@ -1,3 +1,4 @@
+import { encode as base64urlEncode } from "https://deno.land/std@0.170.0/encoding/base64url.ts";
 import { decode as msgpackDecode, encode as msgpackEncode } from "https://esm.sh/@msgpack/msgpack@2.8.0";
 import { create as XXH64Create } from "https://deno.land/x/xxhash64@1.0.0/mod.ts";
 
@@ -13,7 +14,7 @@ function later(delay: number): Promise<void> {
 
 
 function convertToFilePath(urlPathname: string): string {
-    return "./data/" + h.update(urlPathname).digest('hex') + ".bin";
+    return "./data/" + base64urlEncode(h.update(urlPathname).digest() as Uint8Array) + ".bin";
 }
 
 
