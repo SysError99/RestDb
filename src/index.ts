@@ -82,6 +82,7 @@ function getWorker() {
 
 
 const messagePromises = new Map();
+const workerhashMap = new Map();
 const workers: Worker[] = [];
 let workerIndex = 0;
 
@@ -129,7 +130,13 @@ async function handler(req: Request): Promise<Response> {
             body: body,
         };
         messagePromises.set(uid, resolve);
-        workers[hashToNumber(pathname.split('/')[1]) % workersLength].postMessage(message);
+        if (workerhashMap.has(pathname)) {
+            workers[workerhashMap.get(pathname)].postMessage(message);
+        } else {
+            const i = hashToNumber(pathname.split('/')[1]) % workersLength;
+            workerhashMap.set(pathname, i);
+            workers[i].postMessage(message);
+        }
         // workers[workerIndex].postMessage(message);
         // workerIndex++;
         // if (workerIndex == workersLength) {
