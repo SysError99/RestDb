@@ -76,13 +76,13 @@ let workerIndex = 0;
 for (let i = 0; i < config.workers; i++) {
     const worker = getWorker();
     worker.onmessage = (e) => {
-        const res = e.data as WorkerResponse;
-        const uid = res.uid ? res.uid : "";
+        const wRes = e.data as WorkerResponse;
+        const uid = wRes.uid ? wRes.uid : "";
         if (!uid) return;
         if (messagePromises.has(uid)) {
             // deno-lint-ignore ban-types
             const resolve = messagePromises.get(uid) as Function;
-            resolve(res);
+            resolve(wRes);
         }
     };
     workers.push(worker);
@@ -104,7 +104,7 @@ async function handler(req: Request): Promise<Response> {
     const url = new URL(req.url);
     const pathname = await translateArrayIndex(url.pathname);
     const body = req.method !== "GET" ? await req.json() as Record<string, unknown> : {}
-    const res: WorkerResponse = await new Promise((resolve) => {
+    const wRes: WorkerResponse = await new Promise((resolve) => {
         const uid = crypto.randomUUID();
         const message: WorkerMessage = {
             uid: uid,
@@ -122,12 +122,12 @@ async function handler(req: Request): Promise<Response> {
             workerIndex = 0;
         }
     });
-    if (res.json) {
-        const response = new Response(JSON.stringify(res.json), { status: res.status });
+    if (wRes.json) {
+        const response = new Response(JSON.stringify(wRes.json), { status: wRes.status });
         response.headers.set("Content-Type", "application/json; charset=utf-8");
         return response;
     }
-    return new Response(res.text, { status: res.status });
+    return new Response(wRes.text, { status: wRes.status });
 }
 
 
