@@ -86,7 +86,12 @@ for (let i = 0; i < config.workers; i++) {
         }
     };
     workers.push(worker);
+    workerIndex++;
 }
+
+
+const workersLength = workerIndex;
+workerIndex = 0;
 
 
 async function handler(req: Request): Promise<Response> {
@@ -114,7 +119,7 @@ async function handler(req: Request): Promise<Response> {
         messagePromises.set(uid, resolve);
         workers[workerIndex].postMessage(message);
         workerIndex++;
-        if (workerIndex == workers.length) {
+        if (workerIndex == workersLength) {
             workerIndex = 0;
         }
     });
