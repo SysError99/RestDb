@@ -7,27 +7,15 @@ const cachedPath1 = new Map();
 const cachedPath2 = new Map();
 const cachedPath3 = new Map();
 const cachedPath4 = new Map();
-const cachedPath5 = new Map();
-const cachedPath6 = new Map();
-const cachedPath7 = new Map();
-const cachedPath8 = new Map();
-const maxPathMap = 1000000;
-const maxPathMapPart = Math.floor(maxPathMap / 8);
+const maxCacheMap = 131072;
+const maxCacheMapPart = Math.floor(maxCacheMap / 4);
 const cachedPaths = [
     cachedPath1,
     cachedPath2,
     cachedPath3,
     cachedPath4,
-    cachedPath5,
-    cachedPath6,
-    cachedPath7,
-    cachedPath8,
 ];
 const cachedPathCounts = [
-    0,
-    0,
-    0,
-    0,
     0,
     0,
     0,
@@ -48,18 +36,6 @@ async function convertToFilePath(urlPathname: string): Promise<string> {
     if (cachedPath4.has(urlPathname)) {
         return cachedPath4.get(urlPathname);
     }
-    if (cachedPath5.has(urlPathname)) {
-        return cachedPath5.get(urlPathname);
-    }
-    if (cachedPath6.has(urlPathname)) {
-        return cachedPath6.get(urlPathname);
-    }
-    if (cachedPath7.has(urlPathname)) {
-        return cachedPath7.get(urlPathname);
-    }
-    if (cachedPath8.has(urlPathname)) {
-        return cachedPath8.get(urlPathname);
-    }
     const p = "./data/" + base64urlEncode(
         await crypto.subtle.digest(
             'SHA-256',
@@ -69,7 +45,7 @@ async function convertToFilePath(urlPathname: string): Promise<string> {
     while (true) {
         const rand = Math.floor(Math.random() * cachedPaths.length);
         const cachedPath = cachedPaths[rand]
-        if (cachedPathCounts[rand] > maxPathMapPart ) {
+        if (cachedPathCounts[rand] > maxCacheMapPart ) {
             cachedPathCounts[rand] = 0;
             cachedPath.clear();
         }
