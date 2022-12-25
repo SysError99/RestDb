@@ -108,6 +108,7 @@ async function handler(req: Request): Promise<Response> {
                 : "",
             body: body,
         };
+        log(req.method + " " + pathname);
         messagePromises.set(uid, resolve);
         workers[workerIndex].postMessage(message);
         workerIndex++;

@@ -214,7 +214,6 @@ async function handler(req: WorkerMessage): Promise<WorkerResponse> {
         (graphQlQueryToJson(req.ql) as Record<string, unknown>)["query"] as Record<string, unknown>
         : {};
     const pathname = req.pathname;
-    log(req.method + " " + pathname);
     switch (req.method) {
         case "GET":
             if (pathname === "/") {
