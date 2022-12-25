@@ -128,7 +128,7 @@ async function handler(req: Request): Promise<Response> {
             body: body,
         };
         messagePromises.set(uid, resolve);
-        workers[hashToNumber(pathname.split('/')[1])].postMessage(message);
+        workers[hashToNumber(pathname.split('/')[1]) % workersLength].postMessage(message);
         // workers[workerIndex].postMessage(message);
         // workerIndex++;
         // if (workerIndex == workersLength) {
