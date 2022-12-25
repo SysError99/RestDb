@@ -5,6 +5,7 @@ import { parse } from "https://deno.land/std@0.170.0/flags/mod.ts";
 let postRequestCount = 0;
 let patchRequestCount = 0;
 let getRequestCount = 0;
+let smallGetRequestCount = 0;
 
 const array: string[] = [];
 let arrayIndex = 0;
@@ -110,7 +111,7 @@ async function patchRequest() {
     while (testStep === 1) {
         let uuid = array[arrayIndex];
         if (typeof uuid === "undefined") {
-            console.log('Exceede all POST requests, relooping PATCH.');
+            console.log('Exceeded all POST requests, relooping PATCH.');
             uuid = array[0];
             arrayIndex = 0;
         }
@@ -128,7 +129,7 @@ async function getRequest() {
     while (testStep === 2) {
         let uuid = array[arrayIndex];
         if (typeof uuid === "undefined") {
-            console.log('Exceede all POST requests, relooping GET.');
+            console.log('Exceeded all POST requests, relooping GET.');
             uuid = array[0];
             arrayIndex = 0;
         }
@@ -137,6 +138,24 @@ async function getRequest() {
           console.error(`${uuid} returns ${res.status}`);
         }
         getRequestCount++;
+        arrayIndex++;
+    }
+}
+
+
+async function smallGetRequest() {
+    while (testStep === 3) {
+        let uuid = array[arrayIndex];
+        if (typeof uuid === "undefined") {
+            console.log('Exceeded all POST requests, relooping small GET.');
+            uuid = array[0];
+            arrayIndex = 0;
+        }
+        const res = await fetch(`${flags.address}/${uuid}`, { headers: headers, method: 'GET', });
+        if (res.status != 200) {
+          console.error(`${uuid} returns ${res.status}`);
+        }
+        smallGetRequestCount++;
         arrayIndex++;
     }
 }
@@ -155,10 +174,15 @@ function runTest() {
             headers.set('ql', ql);
             func = getRequest;
             break;
+        case 3:
+            headers.delete('ql');
+            func = smallGetRequest;
+            break;
         default:
             console.log(`POST average: ${postRequestCount * 1000 / time} req/s`);
             console.log(`PATCH avereage: ${patchRequestCount * 1000 / time} req/s`);
-            console.log(`GET average ${getRequestCount * 1000 / time} req/s`);
+            console.log(`GET average:  ${getRequestCount * 1000 / time} req/s`);
+            console.log(`Small GET average: ${smallGetRequestCount * 1000 / time} req/s`);
             Deno.exit(0);
     }
     console.log(`Testing ${testStep}...`);
